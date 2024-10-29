@@ -1,56 +1,100 @@
 // src/components/Signup.jsx
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function Signup() {
-  return (
-    <form className="space-y-6">
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          Full Name
-        </label>
-        <input
-          type="text"
-          name="name"
-          id="name"
-          className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-          placeholder="Your full name"
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email address
-        </label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-          placeholder="you@example.com"
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Password
-        </label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-          placeholder="Your password"
-          required
-        />
-      </div>
-      <button
-        type="submit"
-        className="w-full px-4 py-2 text-white bg-green-500 rounded-lg shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 transform transition duration-200 hover:scale-105"
-      >
-        Sign Up
-      </button>
-    </form>
-  );
-}
+
+const Signup = () => {
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [userType, setUserType] = useState('student'); // Default to student
+    const navigate = useNavigate();
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log('Username:', username);
+        console.log('Email:', email);
+        console.log('Password:', password);
+        console.log('User Type:', userType);
+
+        // Redirect based on user type
+        if (userType === 'student') {
+            navigate('/student-registration');
+        } else if (userType === 'teacher') {
+            navigate('/teacher');
+        }
+    };
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-gray-700">Username</label>
+                <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                    required
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                    required
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                    required
+                />
+            </div>
+        
+            {/* Radio Buttons for User Type */}
+            <fieldset className="mt-4">
+                <legend className="block text-sm font-medium text-gray-700">I am a:</legend>
+                <div className="flex items-center mt-2">
+                    <input
+                        type="radio"
+                        id="student"
+                        name="userType"
+                        value="student"
+                        checked={userType === 'student'}
+                        onChange={(e) => setUserType(e.target.value)}
+                        className="mr-2"
+                    />
+                    <label htmlFor="student" className="text-sm">Student</label>
+                </div>
+                <div className="flex items-center mt-2">
+                    <input
+                        type="radio"
+                        id="teacher"
+                        name="userType"
+                        value="teacher"
+                        checked={userType === 'teacher'}
+                        onChange={(e) => setUserType(e.target.value)}
+                        className="mr-2"
+                    />
+                    <label htmlFor="teacher" className="text-sm">Teacher</label>
+                </div>
+            </fieldset>
+        
+            <button
+                type="submit"
+                className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+                Sign Up
+            </button>
+        </form>
+    );
+  
+};
 
 export default Signup;
