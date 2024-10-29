@@ -4,6 +4,8 @@ import Login from './components/Login'
 import Signup from './components/Signup';
 import StudentRegistration from './components/StudentRegistration';
 import Teacher from './components/TeacherRegistration';
+import StudentHome from './components/studenthome';
+import TeacherHome from './components/TeacherHome';
 
 function App() {
     return (
@@ -14,6 +16,8 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/student-registration" element={<StudentRegistration />} />
                 <Route path="/teacher" element={<Teacher />} />
+                <Route path="/studenthome" element={<StudentHome />} />
+                <Route path="/teacherhome" element={<TeacherHome />} />
             </Routes>
         </Router>
     );
