@@ -293,6 +293,7 @@ const TeacherRegistration = () => {
                     <button
                         type="submit"
                         className="w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 mt-4"
+                        onClick={() => navigate('/teacherhome')}
                     >
                         Register
                     </button>

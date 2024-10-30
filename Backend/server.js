@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const studentRoutes = require('./routes/students');
 const teacherRoutes = require('./routes/teachers');
 const userRoutes = require('./routes/users');
+const csvRoutes = require('./routes/teacherRoutes')
+const marksRoutes = require('./routes/marksRoutes'); // Import your new route
 
 
 const app = express();
@@ -27,6 +29,8 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/results', csvRoutes);
+app.use('/api', marksRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -101,12 +101,14 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('student'); // Default role
+    const navigate = useNavigate(); // Initialize useNavigate
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -116,6 +118,13 @@ const Signup = () => {
             const response = await axios.post('http://localhost:5000/api/users/signup', formData);
             console.log(response.data.message);
             // Redirect or perform additional actions after successful signup
+             // Redirect based on role
+            if (role === 'student') {
+                navigate('/student-registration'); // Redirect to student registration
+            } 
+            else {
+                navigate('/teacher-registration'); // Redirect to teacher registration
+            }
         } catch (error) {
             console.error('Error signing up user:', error);
         }
