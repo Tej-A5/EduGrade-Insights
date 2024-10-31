@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const StudentRegistration = () => {
+    const navigate = useNavigate(); // Initialize useNavigate
     const [formData, setFormData] = useState({
         registrationId: '',
         name: '',
         email: '',
+        password:'',
         course: '',
         year: ''
     });
@@ -20,6 +23,8 @@ const StudentRegistration = () => {
         try {
             const response = await axios.post('http://localhost:5000/api/students/register', formData);
             console.log(response.data.message);
+            localStorage.setItem('student', JSON.stringify(response.data.student));
+            navigate('/studenthome');
         } catch (error) {
             console.error('Error registering student:', error);
         }
@@ -73,6 +78,19 @@ const StudentRegistration = () => {
                         />
                     </div>
 
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Password</label>
+                        <input
+                            name="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="Password"
+                            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                            required
+                        />
+                    </div>
+
                     {/* Course Field */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Course</label>
@@ -104,7 +122,7 @@ const StudentRegistration = () => {
                     <button
                         type="submit"
                         className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                        onClick={() => navigate('/studenthome')}
+                        // onClick={() => navigate('/studenthome')}
                     >
                         Register
                     </button>

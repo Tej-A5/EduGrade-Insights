@@ -19,6 +19,8 @@ const StudentHome = () => {
     const [resultType, setResultType] = useState('mid-sem'); // Default result type
     const [marksData, setMarksData] = useState([]);
 
+    const [user, setUser] = useState(null);
+
     // Fetch marks data based on selected subject and result type
     useEffect(() => {
         const fetchMarksData = async () => {
@@ -34,6 +36,20 @@ const StudentHome = () => {
 
         fetchMarksData();
     }, [subject, resultType]);
+    console.log('Stored teacher data:', localStorage.getItem('student'));
+    useEffect(() => {
+        // Retrieve user data from local storage
+        const loggedUser = JSON.parse(localStorage.getItem('student'));
+        
+        console.log(loggedUser);
+        if (loggedUser ) {
+            setUser(loggedUser);
+            console.log(user);
+        } else {
+            // Redirect or show an error if the user is not a student
+            // navigate('/login');
+        }
+    }, []);
 
     // Prepare data for the histogram chart
     // const chartData = {
@@ -106,13 +122,15 @@ const StudentHome = () => {
             },
         },
     };
-
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
             {/* Navbar */}
             <nav className="bg-indigo-700 bg-opacity-40 text-white py-4 px-6 shadow-md m-4 rounded-lg">
                 <h1 className="text-2xl font-semibold">Studenthome</h1>
+                
+                <h1>Welcome, {user ? user.name : 'Student'}!</h1>
             </nav>
+            
 
             {/* Main content area */}
             <div className="flex flex-grow mx-4 mb-4 space-x-4">
@@ -192,13 +210,18 @@ const StudentHome = () => {
                 {/* Right Sidebar */}
                 <aside className="w-1/5 bg-indigo-800 bg-opacity-40 text-white p-4 rounded-lg shadow-lg">
                     <h3 className="text-lg font-semibold mb-2">Subject List</h3>
-                    <ul>
+                    {/* <ul>
                         <li className="mb-2">Mathematics</li>
                         <li className="mb-2">Science</li>
                         <li className="mb-2">History</li>
                         <li className="mb-2">Geography</li>
                         <li className="mb-2">Language Arts</li>
-                    </ul>
+                    </ul> */}
+                    <button
+                        className="w-full mt-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg"
+                    >
+                        Add Subject
+                    </button>
                 </aside>
             </div>
         </div>

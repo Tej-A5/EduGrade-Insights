@@ -1,26 +1,49 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const Teacher = require('../models/Teacher');
 const router = express.Router();
 
 // Register a new teacher
+// router.post('/register', async (req, res) => {
+//     const { name, email,password,  department, classes } = req.body;
+
+//     try {
+//         const newTeacher = new Teacher({
+//             name,
+//             email,
+//             password,
+//             department,
+//             classes,
+//         });
+
+//         await newTeacher.save();
+//         res.status(201).json({ message: 'Teacher registered successfully' });
+//     } catch (error) {
+//         console.error('Error registering teacher:', error);
+//         res.status(500).json({ error: 'Failed to register teacher' });
+//     }
+// });
 router.post('/register', async (req, res) => {
-    const { name, email, department, experience, classes } = req.body;
+    const { name, email, password, department, classes } = req.body;
 
     try {
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newTeacher = new Teacher({
             name,
             email,
+            password: hashedPassword,
             department,
-            experience,
             classes,
         });
 
-        await newTeacher.save();
-        res.status(201).json({ message: 'Teacher registered successfully' });
+        const savedTeacher = await newTeacher.save();
+        res.status(201).json({ message: 'Teacher registered successfully', teacher: savedTeacher }); // Make sure this returns the saved teacher
     } catch (error) {
         console.error('Error registering teacher:', error);
-        res.status(500).json({ error: 'Failed to register teacher' });
+        res.status(400).json({ message: 'Error registering teacher', error: error.message }); // Return error message
     }
 });
+
 
 module.exports = router;

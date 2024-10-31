@@ -1,21 +1,31 @@
 // import React, { useState } from 'react';
+// import axios from 'axios';
+// import { useNavigate } from 'react-router-dom';
 
 // const TeacherRegistration = () => {
+//     const navigate = useNavigate(); // Initialize useNavigate
 //     const [name, setName] = useState('');
 //     const [email, setEmail] = useState('');
+//     const [password, setPassword] = useState('');
 //     const [department, setDepartment] = useState('');
+//     // const [experience, setExperience] = useState('');
 //     const [year, setYear] = useState('');
 //     const [branch, setBranch] = useState('');
 //     const [subject, setSubject] = useState('');
 //     const [classes, setClasses] = useState([]);
 
-//     const handleSubmit = (e) => {
+//     const handleSubmit = async (e) => {
 //         e.preventDefault();
-//         console.log('Teacher Name:', name);
-//         console.log('Email:', email);
-//         console.log('Department:', department);
-//         console.log('Classes:', classes);
-//         // Handle form submission logic here
+//         const formData = { name, email, password, department, classes };
+
+//         try {
+//             const response = await axios.post('http://localhost:5000/api/teachers/register', formData);
+//             console.log(response.data.message);
+//             localStorage.setItem('teacher', JSON.stringify(response.data.teacher));
+//             navigate('/teacherhome');
+//         } catch (error) {
+//             console.error('Error registering teacher:', error);
+//         }
 //     };
 
 //     const handleAddClass = () => {
@@ -27,8 +37,7 @@
 //     };
 
 //     const handleRemoveClass = (index) => {
-//         const updatedClasses = classes.filter((_, i) => i !== index);
-//         setClasses(updatedClasses);
+//         setClasses(classes.filter((_, i) => i !== index));
 //     };
 
 //     return (
@@ -57,6 +66,17 @@
 //                         />
 //                     </div>
 //                     <div>
+//                         <label className="block text-sm font-medium text-gray-700">Password</label>
+//                         <input
+//                             type="password"
+//                             value={password}
+//                             onChange={(e) => setPassword(e.target.value)}
+//                             placeholder="Password"
+//                             className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+//                             required
+//                         />
+//                     </div>
+//                     <div>
 //                         <label className="block text-sm font-medium text-gray-700">Department</label>
 //                         <input
 //                             type="text"
@@ -66,7 +86,7 @@
 //                             required
 //                         />
 //                     </div>
-
+//                     {/* Form fields */}
 //                     {/* Add Class Section */}
 //                     <div className="mt-4">
 //                         <h3 className="text-lg font-semibold">Add Classes Teaching</h3>
@@ -87,7 +107,7 @@
 //                             />
 //                             <input
 //                                 type="text"
-//                                 placeholder="Subject"
+//                                 placeholder="Class"
 //                                 value={subject}
 //                                 onChange={(e) => setSubject(e.target.value)}
 //                                 className="p-2 border border-gray-300 rounded-md"
@@ -101,7 +121,6 @@
 //                             Add Class
 //                         </button>
 //                     </div>
-
 //                     {/* Classes Table */}
 //                     {classes.length > 0 && (
 //                         <div className="mt-6">
@@ -111,7 +130,7 @@
 //                                     <tr>
 //                                         <th className="py-2 border-b text-left px-4">Year</th>
 //                                         <th className="py-2 border-b text-left px-4">Branch</th>
-//                                         <th className="py-2 border-b text-left px-4">Subject</th>
+//                                         <th className="py-2 border-b text-left px-4">Class</th>
 //                                         <th className="py-2 border-b text-left px-4">Actions</th>
 //                                     </tr>
 //                                 </thead>
@@ -135,10 +154,10 @@
 //                             </table>
 //                         </div>
 //                     )}
-
 //                     <button
 //                         type="submit"
 //                         className="w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 mt-4"
+//                         // onClick={() => navigate('/teacherhome')}
 //                     >
 //                         Register
 //                     </button>
@@ -152,39 +171,65 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const TeacherRegistration = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [department, setDepartment] = useState('');
-    const [experience, setExperience] = useState('');
-    const [year, setYear] = useState('');
-    const [branch, setBranch] = useState('');
-    const [subject, setSubject] = useState('');
-    const [classes, setClasses] = useState([]);
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        department: '',
+        year: '',
+        branch: '',
+        subject: '',
+        classes: []
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const formData = { name, email, department, experience, classes };
+        const { name, email, password, department, classes } = formData;
 
         try {
-            const response = await axios.post('http://localhost:5000/api/teachers/register', formData);
-            console.log(response.data.message);
+            const response = await axios.post('http://localhost:5000/api/teachers/register', { name, email, password, department, classes });
+            console.log('Response from server:', response.data);
+
+            // Check if teacher data exists in the response before storing it
+            if (response.data && response.data.teacher) {
+                localStorage.setItem('teacher', JSON.stringify(response.data.teacher));
+                navigate('/teacherhome');
+            } else {
+                console.error('Registration failed: No teacher data in response');
+            }
         } catch (error) {
             console.error('Error registering teacher:', error);
         }
     };
 
     const handleAddClass = () => {
-        const newClass = { year, branch, subject };
-        setClasses([...classes, newClass]);
-        setYear('');
-        setBranch('');
-        setSubject('');
+        const newClass = { year: formData.year, branch: formData.branch, subject: formData.subject };
+        setFormData((prevData) => ({
+            ...prevData,
+            classes: [...prevData.classes, newClass],
+            year: '',
+            branch: '',
+            subject: ''
+        }));
     };
 
     const handleRemoveClass = (index) => {
-        setClasses(classes.filter((_, i) => i !== index));
+        setFormData((prevData) => ({
+            ...prevData,
+            classes: prevData.classes.filter((_, i) => i !== index)
+        }));
     };
 
     return (
@@ -196,8 +241,9 @@ const TeacherRegistration = () => {
                         <label className="block text-sm font-medium text-gray-700">Name</label>
                         <input
                             type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                             required
                         />
@@ -206,8 +252,20 @@ const TeacherRegistration = () => {
                         <label className="block text-sm font-medium text-gray-700">Email</label>
                         <input
                             type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                             required
                         />
@@ -216,36 +274,39 @@ const TeacherRegistration = () => {
                         <label className="block text-sm font-medium text-gray-700">Department</label>
                         <input
                             type="text"
-                            value={department}
-                            onChange={(e) => setDepartment(e.target.value)}
+                            name="department"
+                            value={formData.department}
+                            onChange={handleChange}
                             className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                             required
                         />
                     </div>
-                    {/* Form fields */}
                     {/* Add Class Section */}
                     <div className="mt-4">
                         <h3 className="text-lg font-semibold">Add Classes Teaching</h3>
                         <div className="grid grid-cols-3 gap-2 mt-2">
                             <input
                                 type="text"
+                                name="year"
                                 placeholder="Year"
-                                value={year}
-                                onChange={(e) => setYear(e.target.value)}
+                                value={formData.year}
+                                onChange={handleChange}
                                 className="p-2 border border-gray-300 rounded-md"
                             />
                             <input
                                 type="text"
+                                name="branch"
                                 placeholder="Branch"
-                                value={branch}
-                                onChange={(e) => setBranch(e.target.value)}
+                                value={formData.branch}
+                                onChange={handleChange}
                                 className="p-2 border border-gray-300 rounded-md"
                             />
                             <input
                                 type="text"
+                                name="subject"
                                 placeholder="Class"
-                                value={subject}
-                                onChange={(e) => setSubject(e.target.value)}
+                                value={formData.subject}
+                                onChange={handleChange}
                                 className="p-2 border border-gray-300 rounded-md"
                             />
                         </div>
@@ -258,7 +319,7 @@ const TeacherRegistration = () => {
                         </button>
                     </div>
                     {/* Classes Table */}
-                    {classes.length > 0 && (
+                    {formData.classes.length > 0 && (
                         <div className="mt-6">
                             <h3 className="text-lg font-semibold mb-2">Classes Teaching</h3>
                             <table className="min-w-full bg-white border border-gray-200 rounded-md">
@@ -271,7 +332,7 @@ const TeacherRegistration = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {classes.map((classItem, index) => (
+                                    {formData.classes.map((classItem, index) => (
                                         <tr key={index}>
                                             <td className="py-2 border-b px-4">{classItem.year}</td>
                                             <td className="py-2 border-b px-4">{classItem.branch}</td>
@@ -293,7 +354,6 @@ const TeacherRegistration = () => {
                     <button
                         type="submit"
                         className="w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 mt-4"
-                        onClick={() => navigate('/teacherhome')}
                     >
                         Register
                     </button>

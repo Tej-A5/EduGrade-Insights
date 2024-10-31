@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 // import Login from './Login';
 // import Signup from './Signup';
@@ -6,18 +7,92 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 function Home() {
   // const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate(); // Initialize useNavigate
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('student'); // Default role
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const formData = { email, password, role };
+
+  //   try {
+  //       const response = await axios.post('http://localhost:5000/api/users/login', formData);
+  //       console.log(response.data.message);
+  //       // Redirect or perform additional actions after successful signup
+  //        // Redirect based on role
+  //       if (role === 'student') {
+  //           navigate('/studenthome'); // Redirect to student registration
+  //       } 
+  //       else {
+  //           navigate('/teacherhome'); // Redirect to teacher registration
+  //       }
+  //   } catch (error) {
+  //       console.error('Error signing up user:', error);
+  //   }
+  // };
+
+  // After a successful login in the login component
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = { email, password, role };
+  
+    try {
+        const response = await axios.post('http://localhost:5000/api/users/login', formData);
+        console.log('Login response:', response.data); // Log the entire response
+        if (response.data.success) {
+            // Save user data in local storage
+            console.log("Login successful:", response.data);
+            // localStorage.setItem('user', JSON.stringify({
+            //     id: response.data.user._id,
+            //     role: role,
+            //     name: response.data.user.name,
+            // }));
+            // // Redirect based on role
+            // if (role === 'student') {
+            //   navigate('/studenthome');
+            // } else {
+            //     navigate('/teacherhome');
+            // }
+            // // Redirect based on role
+            // navigate(role === 'student' ? '/studenthome' : '/teacherhome');
+            if (role === 'student') {
+              localStorage.setItem('student', JSON.stringify(response.data.user));
+              console.log('Stored teacher data:', localStorage.getItem('user'));
+              console.log('Stored teacher data:', localStorage.getItem('student'));
+              console.log('Stored teacher data:', localStorage.getItem('teacher'));
+              navigate('/studenthome');
+            } else if (role === 'teacher') {
+                localStorage.setItem('teacher', JSON.stringify(response.data.user));
+                console.log('Stored teacher data:', localStorage.getItem('user'));
+                console.log('Stored teacher data:', localStorage.getItem('student'));
+                console.log('Stored teacher data:', localStorage.getItem('teacher'));
+                navigate('/teacherhome');
+            }
+        }
+        else {
+          setErrorMessage(response.data.message || 'Login failed. Please try again.');
+          console.error("Login failed: ", response.data.message);
+        }
+    } catch (error) {
+      setErrorMessage('Error signing in. Please check your credentials and try again.');
+        console.error('Error signing in:', error);
+    }
+  };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
         <h2 className="text-3xl font-extrabold text-center text-gray-800">Login</h2>
-        <form className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email address
             </label>
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               name="email"
               id="email"
               className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
@@ -32,6 +107,8 @@ function Home() {
             <input
               type="password"
               name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               id="password"
               className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
               placeholder="Your password"
@@ -41,6 +118,8 @@ function Home() {
           <div>
               <label className="block text-sm font-medium text-gray-700">Role</label>
               <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
                   // value={role}
                   // onChange={(e) => setRole(e.target.value)}
                   className="mt-1 p-2 border border-gray-300 rounded-md w-full"
