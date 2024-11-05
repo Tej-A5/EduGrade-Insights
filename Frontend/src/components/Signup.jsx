@@ -99,88 +99,88 @@
 
 // export default Signup;
 
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+// import React, { useState } from 'react';
+// import axios from 'axios';
+// import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-const Signup = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('student'); // Default role
-    const navigate = useNavigate(); // Initialize useNavigate
+// const Signup = () => {
+//     const [name, setName] = useState('');
+//     const [email, setEmail] = useState('');
+//     const [password, setPassword] = useState('');
+//     const [role, setRole] = useState('student'); // Default role
+//     const navigate = useNavigate(); // Initialize useNavigate
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const formData = { name, email, password, role };
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+//         const formData = { name, email, password, role };
 
-        try {
-            const response = await axios.post('http://localhost:5000/api/users/signup', formData);
-            console.log(response.data.message);
-            // Redirect or perform additional actions after successful signup
-             // Redirect based on role
-            if (role === 'student') {
-                navigate('/student-registration'); // Redirect to student registration
-            } 
-            else {
-                navigate('/teacher-registration'); // Redirect to teacher registration
-            }
-        } catch (error) {
-            console.error('Error signing up user:', error);
-        }
-    };
+//         try {
+//             const response = await axios.post('http://localhost:5000/api/users/signup', formData);
+//             console.log(response.data.message);
+//             // Redirect or perform additional actions after successful signup
+//              // Redirect based on role
+//             if (role === 'student') {
+//                 navigate('/student-registration'); // Redirect to student registration
+//             } 
+//             else {
+//                 navigate('/teacher-registration'); // Redirect to teacher registration
+//             }
+//         } catch (error) {
+//             console.error('Error signing up user:', error);
+//         }
+//     };
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    required
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    required
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                    required
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Role</label>
-                <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                >
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                </select>
-            </div>
-            <button
-                type="submit"
-                className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-                Sign Up
-            </button>
-        </form>
-    );
-};
+//     return (
+//         <form onSubmit={handleSubmit} className="space-y-4">
+//             <div>
+//                 <label className="block text-sm font-medium text-gray-700">Name</label>
+//                 <input
+//                     type="text"
+//                     value={name}
+//                     onChange={(e) => setName(e.target.value)}
+//                     className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+//                     required
+//                 />
+//             </div>
+//             <div>
+//                 <label className="block text-sm font-medium text-gray-700">Email</label>
+//                 <input
+//                     type="email"
+//                     value={email}
+//                     onChange={(e) => setEmail(e.target.value)}
+//                     className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+//                     required
+//                 />
+//             </div>
+//             <div>
+//                 <label className="block text-sm font-medium text-gray-700">Password</label>
+//                 <input
+//                     type="password"
+//                     value={password}
+//                     onChange={(e) => setPassword(e.target.value)}
+//                     className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+//                     required
+//                 />
+//             </div>
+//             <div>
+//                 <label className="block text-sm font-medium text-gray-700">Role</label>
+//                 <select
+//                     value={role}
+//                     onChange={(e) => setRole(e.target.value)}
+//                     className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+//                 >
+//                     <option value="student">Student</option>
+//                     <option value="teacher">Teacher</option>
+//                 </select>
+//             </div>
+//             <button
+//                 type="submit"
+//                 className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+//             >
+//                 Sign Up
+//             </button>
+//         </form>
+//     );
+// };
 
-export default Signup;
+// export default Signup;

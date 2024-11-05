@@ -1,8 +1,19 @@
 const mongoose = require('mongoose');
 
+const examSchema = new mongoose.Schema({
+    type: { type: String, required: true }, // e.g., 'mid-sem', 'end-sem'
+    year: { type: Number, required: true },
+    score: { type: Number, required: true }
+});
+
+const markSchema = new mongoose.Schema({
+    subject: { type: String, required: true },
+    exams: [examSchema]
+});
+
 const resultSchema = new mongoose.Schema({
     registrationId: { type: String, required: true, unique: true },
-    marks: { type: Map, of: Number } // Marks as a map with subject names as keys and scores as values
+    marks: [markSchema]
 });
 
 module.exports = mongoose.model('Result', resultSchema);

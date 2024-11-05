@@ -8,6 +8,10 @@ const teacherRoutes = require('./routes/teachers');
 const userRoutes = require('./routes/users');
 const csvRoutes = require('./routes/teacherRoutes')
 const marksRoutes = require('./routes/marksRoutes'); // Import your new route
+const classRoutes = require('./routes/classes');
+const resultRoutes = require('./routes/resultRoutes');
+const lowScoresRoute = require('./routes/lowScoresRoute');
+const addclass = require('./routes/addclass');
 
 
 const app = express();
@@ -31,6 +35,10 @@ app.use('/api/teachers', teacherRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/results', csvRoutes);
 app.use('/api', marksRoutes);
+app.use('/api', classRoutes);
+app.use('/api', resultRoutes);
+app.use('/api', lowScoresRoute);
+app.use('/api/teachersclass', addclass);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

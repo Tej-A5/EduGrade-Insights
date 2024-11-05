@@ -1,95 +1,44 @@
-// // routes/marksRoutes.js
-// const express = require('express');
-// const Result = require('../models/Result'); // Adjust the path based on your project structure
-
-// const router = express.Router();
-
-// // Endpoint to fetch marks based on subject and result type
-// router.get('/marks', async (req, res) => {
-//     const { subject, resultType } = req.query;
-
-//     try {
-//         // Find students with the specific marks for the given subject and result type
-//         const marksData = await Result.find({ [`marks.${subject}.${resultType}`]: { $exists: true } })
-//             .select(`marks.${subject}.${resultType}`)
-//             .exec();
-
-//         // Extract marks data
-//         const marks = marksData.map((result) => result.marks[subject][resultType]);
-//         res.json({ marks });
-//     } catch (error) {
-//         res.status(500).json({ error: 'Error fetching marks data' });
-//     }
-// });
-
-// module.exports = router;
-
-// routes/marksRoutes.js
-// const express = require('express');
-// const Student = require('../models/Result');
-
-// const router = express.Router();
-
-// // Endpoint to fetch marks based on subject and result type
-// router.get('/marks', async (req, res) => {
-//     const { subject, resultType } = req.query;
-
-//     if (!subject || !resultType) {
-//         return res.status(400).json({ error: 'Both subject and resultType are required.' });
-//     }
-
-//     try {
-//         // Dynamically build the field path for the specific marks data
-//         const fieldPath = `marks.${resultType}.${subject}`;
-        
-//         // Query for students with marks for the specified subject and result type
-//         const students = await Student.find({ [fieldPath]: { $exists: true } })
-//             .select({ [fieldPath]: 1, _id: 0 })
-//             .lean()
-//             .exec();
-
-//         // Extract the marks for each student
-//         const marks = students.map((student) => {
-//             const resultData = student.marks?.[resultType]?.[subject];
-//             return resultData !== undefined ? resultData : null; // Handle undefined values gracefully
-//         });
-
-//         res.json({ marks });
-//     } catch (error) {
-//         console.error('Error fetching marks data:', error); // Add error logging for troubleshooting
-//         res.status(500).json({ error: 'Error fetching marks data' });
-//     }
-// });
-
-// module.exports = router;
-
-// routes/marksRoutes.js
 const express = require('express');
-const Student = require('../models/Result');
+const Result = require('../models/Result'); // Adjust the path if necessary
 
 const router = express.Router();
 
-// Endpoint to fetch marks based on subject and result type
+// Endpoint to fetch only scores of all students based on subject, result type, and year
 router.get('/marks', async (req, res) => {
-    const { subject, resultType } = req.query;
+    const { subject, resultType, year } = req.query;
 
-    if (!subject || !resultType) {
-        return res.status(400).json({ error: 'Both subject and resultType are required.' });
+    if (!subject || !resultType || !year) {
+        return res.status(400).json({ error: 'Subject, result type, and year are required.' });
     }
 
     try {
-        // Retrieve the full marks object and filter in JavaScript
-        const students = await Student.find({ [`marks.${subject}`]: { $exists: true } })
-            .select({ [`marks.${subject}.${resultType}`]: 1, _id: 0 })
-            .lean()
-            .exec();
+        // Find all results that have the specified subject and exam type/year
+        const results = await Result.find({
+            marks: {
+                $elemMatch: {
+                    subject: subject,
+                    exams: { $elemMatch: { type: resultType, year: parseInt(year, 10) } }
+                }
+            }
+        }).lean();
 
-        // Extract the relevant marks for the specified subject and result type
-        const marks = students
-            .map((student) => student.marks?.[subject]?.[resultType])
-            .filter((mark) => mark !== undefined); // Remove undefined entries
+        // Extract only scores for the specified subject, resultType, and year
+        const scores = results
+            .flatMap((result) => {
+                const subjectEntry = result.marks.find((entry) => entry.subject === subject);
+                if (subjectEntry) {
+                    return subjectEntry.exams
+                        .filter((exam) => exam.type === resultType && exam.year === parseInt(year, 10))
+                        .map((exam) => exam.score);
+                }
+                return [];
+            });
 
-        res.json({ marks });
+        if (scores.length === 0) {
+            return res.status(404).json({ error: `No scores found for subject: ${subject}, result type: ${resultType}, year: ${year}` });
+        }
+
+        res.json({ scores });
     } catch (error) {
         console.error('Error fetching marks data:', error);
         res.status(500).json({ error: 'Error fetching marks data' });
