@@ -12,7 +12,7 @@ router.get('/lowest-scores', async (req, res) => {
         return res.status(400).json({ error: 'Subject, result type, and year are required.' });
         
     }
-    console.log("1");
+    // console.log("1");
     try {
         const yearInt = parseInt(year, 10);
 

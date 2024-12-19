@@ -6,12 +6,12 @@ const router = express.Router();
 // Route to add a new class entry to a teacher by email
 router.post('/add-class', async (req, res) => {
     const { email, year, branch, subject } = req.query;
-    console.log("ggab");
-    console.log(email);
-    console.log(year);
+    // console.log("ggab");
+    // console.log(email);
+    // console.log(year);
 
-    console.log(branch);
-    console.log(subject);
+    // console.log(branch);
+    // console.log(subject);
 
     if (!email || !year || !branch || !subject) {
         return res.status(400).json({ message: 'All fields are required' });
@@ -19,13 +19,13 @@ router.post('/add-class', async (req, res) => {
 
     try {
         // Find the teacher by email and update their classes array
-        console.log("ad");
+        // console.log("ad");
         const updatedTeacher = await Teacher.findOneAndUpdate(
             { email },
             { $push: { classes: { year, branch, subject } } },
             { new: true }
         );
-        console.log(updatedTeacher);
+        // console.log(updatedTeacher);
         if (!updatedTeacher) {
             return res.status(404).json({ message: 'Teacher not found' });
         }

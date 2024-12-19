@@ -1,19 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Bar } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
+import Graph from './Graph';
 
 const TeacherHome = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,17 +14,21 @@ const TeacherHome = () => {
     const [teacher, setTeacher] = useState(null);
     const [classes, setClasses] = useState([]); // State for classes
 
-    const [subject, setSubject] = useState('sei'); // Default subject
+    const [subject, setSubject] = useState(''); // Default subject
     // const [subjects, setSubjects] = useState([]);
-    const [marksData, setMarksData] = useState([]);
+    // const [marksData, setMarksData] = useState([]);
     const [year, setYear] = useState(2024);   
     const [scores, setScores] = useState([]);
     const [classform, setClassform] = useState(false);
-    const [email, setEmail] = useState('');
-    const [branch, setBranch] = useState('');
+    // const [email, setEmail] = useState('');
+    // const [branch, setBranch] = useState('');
     const [classbranch, setClassbranch] = useState('');
     const [classyear, setClassyear] = useState('');
     const [classsubject, setClasssubject] = useState('');
+
+    const [submission, setSubmission] = useState(false);
+    const [semester, setSemester] = useState('');
+    const [credits, setCredits] = useState('');
 
     useEffect(() => {
         const storedTeacher = JSON.parse(localStorage.getItem('teacher'));
@@ -47,24 +39,6 @@ const TeacherHome = () => {
         } else {
             navigate('/');
         }
-        const fetchMarksData = async () => {
-            try {
-                // console.log(storedStudent.year);
-                // console.log(year);
-                // console.log(storedStudent.subject);
-                // console.log(storedStudent.resultType);
-                // console.log(storedStudent.year);
-                // console.log(storedStudent.regid);
-                // console.log(storedStudent);
-                const response = await axios.get(
-                    `http://localhost:5000/api/marks?subject=${subject}&resultType=${resultTypebar}&year=${year}`
-                );
-                setMarksData(response.data.scores);
-                // console.log(response.data.scores);
-            } catch (error) {
-                console.error('Error fetching marks data:', error);
-            }
-        };
         const fetchLowestScores = async () => {
             console.log("gg");
     
@@ -83,7 +57,6 @@ const TeacherHome = () => {
             }
         };
 
-        fetchMarksData();
         fetchLowestScores();
     }, [navigate, subject, resultTypebar, year]);
 
@@ -131,64 +104,6 @@ const TeacherHome = () => {
         }
     };
 
-    const getMarksDistribution = () => {
-        const intervals = new Array(20).fill(0); // Array to hold count for each 5-mark bin (0-100)
-        // console.log(marksData.year);
-        marksData.forEach(mark => {
-            if (mark >= 0 && mark <= 100) {
-                const index = Math.floor(mark / 5);
-                intervals[index] += 1;
-            }
-        });
-
-        return intervals;
-    };
-
-    // Prepare chart data
-    const marksDistribution = getMarksDistribution();
-    const labels = Array.from({ length: 20 }, (_, i) => `${i * 5}-${i * 5 + 4}`);
-
-    const data = {
-        labels: labels,
-        datasets: [
-            {
-                label: 'Number of Students',
-                data: marksDistribution,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1,
-            },
-        ],
-    };
-
-    const options = {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'top',
-            },
-            title: {
-                display: true,
-                text: `Marks Distribution for ${subject} (${resultTypebar}) ${year}`,
-            },
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Number of Students',
-                },
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Marks Range',
-                },
-            },
-        },
-    };
-
     const handleClick = (tempyear, tempsubject) => {
         setYear(tempyear);
         setSubject(tempsubject);
@@ -202,9 +117,30 @@ const TeacherHome = () => {
         try {
             const response = await axios.post(`http://localhost:5000/api/teachersclass/add-class?email=${email}&year=${classyear}&branch=${classbranch}&subject=${classsubject}`);
             console.log(response);
+            setClassform(false);
             // setMessage(response.data.message);
         } catch (error) {
             // setMessage(error.response?.data?.message || 'Error adding class');
+        }
+    };
+
+    const handleGradeUpload = async () => {
+        if (!csvFile || !selectedSubject || !semester || !credits) return;
+
+        const formData = new FormData();
+        formData.append('file', csvFile);
+        formData.append('semester', semester);
+        formData.append('subject', selectedSubject);
+        formData.append('credits', credits);
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/results/upload-grades', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            console.log(response.data.message);
+            setSubmission(false); // Close modal on successful upload
+        } catch (error) {
+            console.error('Error uploading CSV:', error);
         }
     };
 
@@ -287,9 +223,7 @@ const TeacherHome = () => {
                                 </div>
                                 
                             </div>
-                            <div style={{ width: '80%', margin: '0 auto' }}>
-                                    <Bar data={data} options={options} />
-                            </div>
+                            <Graph subject={subject} resultType={resultTypebar} year={year} />
                         </section>
 
                         <section className="p-4 bg-indigo-900 bg-opacity-60 rounded-lg shadow-md">
@@ -330,6 +264,12 @@ const TeacherHome = () => {
                         className="w-full mt-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg"
                     >
                         Add Class
+                    </button>
+                    <button
+                        onClick={() => setSubmission(true)}
+                        className="w-full mt-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg"
+                    >
+                        Add Grades
                     </button>
                 </aside>
             </div>
@@ -401,8 +341,6 @@ const TeacherHome = () => {
             {classform && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
                     <div className="bg-white p-6 rounded-md shadow-md w-96">
-
-                    
                         <form onSubmit={handleSubmit} className='flex flex-col'>
                             <h2 className="text-xl font-semibold mb-4">Add Class</h2>
                             {/* <label>
@@ -435,12 +373,83 @@ const TeacherHome = () => {
                                     required 
                                     className="mb-4 w-full border border-gray-300 p-2 rounded-md"/>
                             </label>
-                            <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Add Class</button>
+                            <div className="flex justify-center space-x-4">
+                                <button
+                                    onClick={() => setClassform(false)}
+                                    className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" 
+                                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                                >
+                                    Add Class
+                                </button>
+                            </div>
                             {/* {message && <p>{message}</p>} */}
                         </form>
                     </div>
                 </div>
 
+            )}
+            {submission && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+                    <div className="bg-white p-6 rounded-md shadow-md w-96">
+                    <form  className='flex flex-col'>
+                            <h2 className="text-xl font-semibold mb-4">Add Grades</h2>
+                            <label>
+                                Semester:
+                                <input type="text" 
+                                    value={semester} 
+                                    onChange={(e) => setSemester(e.target.value)} 
+                                    required 
+                                    className="mb-4 w-full border border-gray-300 p-2 rounded-md"
+                                />
+                            </label>
+                            <select
+                                value={selectedSubject}
+                                onChange={(e) => setSelectedSubject(e.target.value)}
+                                className="mb-4 w-full border border-gray-300 p-2 rounded-md"
+                            >
+                                <option value="">Select Subject</option>
+                                {classes.map((classItem, index) => (
+                                    <option key={index} value={classItem.subject}>
+                                        {classItem.subject}
+                                    </option>
+                                ))}
+                            </select>
+                            <label>
+                                Credit:
+                                <input type="text" 
+                                    value={credits} 
+                                    onChange={(e) => setCredits(e.target.value)} 
+                                    required 
+                                    className="mb-4 w-full border border-gray-300 p-2 rounded-md"/>
+                            </label>
+                            <input
+                                type="file"
+                                accept=".csv"
+                                onChange={handleFileChange}
+                                className="mb-4 w-full border border-gray-300 p-2 rounded-md"
+                            />
+                            <div className="flex justify-center space-x-4">
+                                <button
+                                    onClick={() => setSubmission(false)}
+                                    className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" 
+                                    onClick={handleGradeUpload}
+                                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                                >
+                                    Add Grades
+                                </button>
+                            </div>
+                            {/* {message && <p>{message}</p>} */}
+                        </form>
+                    </div>
+                </div>
             )}
         </div>
     );

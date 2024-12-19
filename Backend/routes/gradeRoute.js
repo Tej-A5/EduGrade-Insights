@@ -3,7 +3,7 @@ const csvParser = require('csv-parser');
 const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
-const Result = require('../models/Result');
+const Result = require('../models/Grades');
 
 const router = express.Router();
 
@@ -12,43 +12,56 @@ const upload = multer({
     dest: path.join(__dirname, '../uploads') // Temporary directory for uploaded files
 });
 
-// Function to handle CSV data and update MongoDB
-const handleCsvUpload = async (csvData, resultType, subject, year) => {
+
+const handleCsvUpload = async (csvData, sem, sub, credits) => {
     for (const row of csvData) {
         const registrationId = row.registrationId;
-        const marks = row.marks && !isNaN(row.marks) ? parseInt(row.marks, 10) : 0;
+        const scores = row.scores && !isNaN(row.scores) ? parseInt(row.scores, 10) : 0;
 
         // Find existing record for the student
         const result = await Result.findOne({ registrationId });
 
         if (result) {
             // Check if subject entry exists
-            let subjectEntry = result.marks.find((entry) => entry.subject == subject);
-            if (!subjectEntry) {
+            // console.log(result);
+            let semEntry = result.Semester.find((entry) => entry.sem == sem);
+            // console.log(semEntry);
+            if (!semEntry) {
                 // If the subject doesn't exist, add a new one
-                subjectEntry = { subject, exams: [
+                semEntry = { sem, subjects: [
                     {
-                        type: resultType,
-                        year: parseInt(year, 10),
-                        score: marks
+                        subject: sub,
+                        score: scores,
+                        credit: credits
                     }
                 ] };
-                result.marks.push(subjectEntry);
+                result.Semester.push(semEntry);
             }
-
+            
+            await result.save();
             // Check if exam entry exists for the specified type and year
-            const examEntry = subjectEntry.exams.find((exam) => exam.type === resultType && exam.year == parseInt(year, 10));
-            if (examEntry) {
+            const subjectEntry = semEntry.subjects.find((subject) => subject.subject == sub);
+            if (subjectEntry) {
                 // Update the existing score
-                examEntry.score = marks;
+                subjectEntry.score = scores;
+                subjectEntry.credit= credits;
             } else {
                 // Add a new exam entry
-                subjectEntry.exams.push({
-                    type: resultType,
-                    year: parseInt(year, 10),
-                    score: marks
+                // console.log(semEntry.subjects);
+                // semEntry.subjects.push({
+                //     subject: sub,
+                //     score: scores,
+                //     credit: credits
+                // });
+                console.log(`Adding new subject ${sub} with score ${scores} and credit ${credits} to semester ${sem}`);
+                semEntry.subjects.push({
+                    subject: sub,
+                    score: scores,
+                    credit: credits
                 });
+                result.markModified('Semester'); // Mark Semester as modified
             }
+            // console.log(subjectEntry);
 
             // Save the updated result document
             await result.save();
@@ -56,14 +69,14 @@ const handleCsvUpload = async (csvData, resultType, subject, year) => {
             // If no result exists, create a new document
             await Result.create({
                 registrationId,
-                marks: [
+                Semester: [
                     {
-                        subject,
-                        exams: [
+                        sem,
+                        subjects: [
                             {
-                                type: resultType,
-                                year: parseInt(year, 10),
-                                score: marks
+                                subject: sub,
+                                score: scores,
+                                credit: credits
                             }
                         ]
                     }
@@ -74,21 +87,21 @@ const handleCsvUpload = async (csvData, resultType, subject, year) => {
 };
 
 // Route to handle CSV upload
-router.post('/upload-csv', upload.single('file'), async (req, res) => {
+router.post('/upload-grades', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
     }
 
     const csvData = [];
-    const resultType = req.body.resultType; // Get the result type from the request body
-    const subject = req.body.subject; // Get the subject from the request body
-    const year = req.body.year; // Get the year from the request body
+    const semester = req.body.semester; // Get the result type from the request body
+    const sub = req.body.subject; // Get the subject from the request body
+    const credits = req.body.credits; // Get the year from the request body
     const filePath = req.file.path;
 
     // Validate that year is provided
-    if (!year) {
-        return res.status(400).json({ message: 'Year is required' });
-    }
+    // if (!year) {
+    //     return res.status(400).json({ message: 'Year is required' });
+    // }
 
     fs.createReadStream(filePath)
         .pipe(csvParser())
@@ -97,7 +110,7 @@ router.post('/upload-csv', upload.single('file'), async (req, res) => {
         })
         .on('end', async () => {
             try {
-                await handleCsvUpload(csvData, resultType, subject, year);
+                await handleCsvUpload(csvData, semester, sub, credits);
                 res.status(200).json({ message: 'CSV uploaded and data updated successfully' });
             } catch (error) {
                 console.error('Error processing CSV data:', error);
