@@ -2,7 +2,6 @@
 
 **EduGrade Insights** is a web application designed to streamline the management and visualization of student grades and academic performance. The platform allows teachers to upload and update student grades, calculate SGPA for semesters, and generate detailed insights through visualizations like radar charts, bar graphs, and pie charts. Built with a robust backend and an intuitive frontend, EduGrade Insights simplifies academic evaluation and data-driven decision-making.
 
-https://github.com/user-attachments/assets/26f78e15-fa5c-4d22-999b-71e7d2bce158
 
 
 ## Features
