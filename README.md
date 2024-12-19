@@ -70,25 +70,25 @@ Ideal for academic institutions seeking a tech-driven approach to student perfor
 >Clone the git repo
 ```
 
-git clone https://github.com/Tej-A5/Bail-.git
+git clone https://github.com/Tej-A5/EduGrade-Insights.git
 
 ```
->start frontend
+>start Frontend
 ```
 
-cd frontend
+cd Frontend
 
 npm i
 
 npm run dev
 
 ```
->start backend
+>start Backend
 ```
 
 cd ..
 
-cd backend
+cd Backend
 
 npm i
 
