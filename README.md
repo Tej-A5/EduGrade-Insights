@@ -1,1 +1,1 @@
-# Student Dashboard
+# EduGrade Insights
